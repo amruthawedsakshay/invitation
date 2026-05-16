@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner Dashboard · Wedding</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Dancing+Script:wght@600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --sage-dark: #5d6d4e; --sage: #8a9a7b; --sage-pale: #e8ede0;
+    --blush-dark: #c89a9a; --gold: #b8956a;
+    --cream: #faf7f2; --text: #4a4a3f; --text-light: #6b6b5e;
+    --green: #4a8050; --red: #c54a4a;
+  }
+  body { font-family: 'Lora', serif; background: var(--cream); color: var(--text); padding: 2rem 1rem; min-height: 100vh; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-family: 'Dancing Script', cursive; font-size: 2.8rem; color: var(--sage-dark); margin-bottom: 0.3rem; text-align: center; }
+  .subtitle { text-align: center; color: var(--text-light); font-style: italic; margin-bottom: 2rem; letter-spacing: 2px; font-size: 0.9rem; text-transform: uppercase; }
+  
+  .login-box { max-width: 400px; margin: 4rem auto; background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 30px rgba(138,154,123,0.15); }
+  .login-box h2 { font-family: 'Dancing Script', cursive; color: var(--sage-dark); font-size: 2rem; text-align: center; margin-bottom: 1.5rem; }
+  
+  .input { width: 100%; padding: 0.8rem 1rem; border: 1px solid #d4d4c8; border-radius: 6px; font-family: inherit; font-size: 1rem; margin-bottom: 1rem; background: var(--cream); }
+  .input:focus { outline: none; border-color: var(--sage-dark); background: white; }
+  
+  .btn { display: inline-block; width: 100%; padding: 0.9rem; background: var(--sage-dark); color: white; border: none; border-radius: 6px; font-family: 'Cormorant Garamond', serif; font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.3s; font-weight: 500; }
+  .btn:hover { background: var(--sage); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; width: auto; }
+  .btn-green { background: var(--green); }
+  .btn-red { background: var(--red); }
+  .btn-outline { background: transparent; color: var(--sage-dark); border: 1px solid var(--sage-dark); }
+  
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+  @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat { background: white; padding: 1.2rem; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(138,154,123,0.1); }
+  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--sage-dark); font-weight: 600; line-height: 1; }
+  .stat-label { font-size: 0.75rem; color: var(--text-light); letter-spacing: 1px; text-transform: uppercase; margin-top: 0.4rem; }
+  
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .tab { padding: 0.6rem 1.2rem; background: white; border: 1px solid #d4d4c8; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.9rem; transition: all 0.2s; }
+  .tab.active { background: var(--sage-dark); color: white; border-color: var(--sage-dark); }
+  
+  .card { background: white; padding: 1.2rem; border-radius: 10px; margin-bottom: 0.8rem; box-shadow: 0 2px 8px rgba(138,154,123,0.08); }
+  .card.pending { border-left: 4px solid var(--gold); background: #fffbf0; }
+  .card.approved { border-left: 4px solid var(--green); }
+  .card.rejected { border-left: 4px solid var(--red); opacity: 0.7; }
+  
+  .card-name { font-weight: 600; color: var(--sage-dark); }
+  .card-text { font-style: italic; margin: 0.5rem 0; color: var(--text); }
+  .card-meta { font-size: 0.8rem; color: var(--text-light); }
+  .card-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
+  
+  .rsvp-row { background: white; padding: 1rem 1.2rem; border-radius: 8px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; box-shadow: 0 1px 4px rgba(138,154,123,0.08); }
+  .badge-yes { background: #dceedb; color: var(--green); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+  .badge-no { background: #f5d6d6; color: var(--red); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+  
+  .empty { text-align: center; padding: 3rem; color: var(--text-light); font-style: italic; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--sage-dark); color: white; padding: 0.8rem 1.5rem; border-radius: 50px; transition: transform 0.3s; z-index: 1000; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--red); }
+  
+  .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
+  .logout { font-size: 0.85rem; color: var(--text-light); cursor: pointer; background: none; border: none; }
+  .logout:hover { color: var(--red); }
+  
+  .export-btn { background: white; border: 1px solid var(--sage-dark); color: var(--sage-dark); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.85rem; }
+  .export-btn:hover { background: var(--sage-dark); color: white; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Owner Dashboard</h1>
+  <p class="subtitle">Aarav &amp; Priya · Wedding Management</p>
+  
+  <!-- LOGIN -->
+  <div id="login" class="login-box">
+    <h2>Welcome Back 💕</h2>
+    <input type="email" id="email" class="input" placeholder="Email" autocomplete="username" />
+    <input type="password" id="password" class="input" placeholder="Password" autocomplete="current-password" />
+    <button class="btn" id="login-btn" onclick="login()">Sign In</button>
+    <p style="text-align: center; font-size: 0.8rem; color: var(--text-light); margin-top: 1rem;">
+      Use the email/password you set in Firebase Auth
+    </p>
+  </div>
+  
+  <!-- DASHBOARD -->
+  <div id="dashboard" style="display: none;">
+    <div class="header-row">
+      <div></div>
+      <button class="logout" onclick="logout()">Sign out →</button>
+    </div>
+    
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="s-pending">0</div><div class="stat-label">Pending</div></div>
+      <div class="stat"><div class="stat-num" id="s-approved">0</div><div class="stat-label">Approved</div></div>
+      <div class="stat"><div class="stat-num" id="s-attending">0</div><div class="stat-label">Attending</div></div>
+      <div class="stat"><div class="stat-num" id="s-declined">0</div><div class="stat-label">Declined</div></div>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" data-tab="pending" onclick="setTab('pending')">Pending Messages</button>
+      <button class="tab" data-tab="approved" onclick="setTab('approved')">Approved</button>
+      <button class="tab" data-tab="rsvp" onclick="setTab('rsvp')">RSVPs</button>
+    </div>
+    
+    <div id="content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { 
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { 
+  getFirestore, collection, query, orderBy, onSnapshot, 
+  doc, updateDoc, deleteDoc 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSy....",
+  authDomain: "wedding-invitation-bbd16.firebaseapp.com",
+  projectId: "wedding-invitation-bbd16",
+  storageBucket: "wedding-invitation-bbd16.firebasestorage.app",
+  messagingSenderId: "280403992272",
+  appId: "1:280403992272:web:..."
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let allMessages = [];
+let allRSVPs = [];
+let currentTab = 'pending';
+
+// Auth state
+onAuthStateChanged(auth, user => {
+  if (user) {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    subscribeData();
+  } else {
+    document.getElementById('login').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+  }
+});
+
+window.login = async function() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('login-btn');
+  if (!email || !password) { toast('Enter email and password', true); return; }
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    toast('Login failed: ' + (e.code || 'unknown'), true);
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+};
+
+window.logout = async function() {
+  await signOut(auth);
+  toast('Signed out');
+};
+
+function subscribeData() {
+  // Messages — ordered by timestamp desc
+  onSnapshot(query(collection(db, "messages"), orderBy("timestamp", "desc")), snap => {
+    allMessages = [];
+    snap.forEach(d => allMessages.push({ id: d.id, ...d.data() }));
+    refresh();
+  });
+  // RSVPs
+  onSnapshot(query(collection(db, "rsvps"), orderBy("timestamp", "desc")), snap => {
+    allRSVPs = [];
+    snap.forEach(d => allRSVPs.push({ id: d.id, ...d.data() }));
+    refresh();
+  });
+}
+
+function refresh() {
+  const pending = allMessages.filter(m => m.status === 'pending').length;
+  const approved = allMessages.filter(m => m.status === 'approved').length;
+  const attending = allRSVPs.filter(r => r.attending === 'yes').reduce((sum, r) => sum + (r.guests || 1), 0);
+  const declined = allRSVPs.filter(r => r.attending === 'no').length;
+  
+  document.getElementById('s-pending').textContent = pending;
+  document.getElementById('s-approved').textContent = approved;
+  document.getElementById('s-attending').textContent = attending;
+  document.getElementById('s-declined').textContent = declined;
+  
+  renderTab();
+}
+
+window.setTab = function(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => 
+    t.classList.toggle('active', t.dataset.tab === tab)
+  );
+  renderTab();
+};
+
+function renderTab() {
+  const c = document.getElementById('content');
+  
+  if (currentTab === 'pending') {
+    const items = allMessages.filter(m => m.status === 'pending');
+    if (!items.length) { c.innerHTML = '<div class="empty">No pending messages 🌿</div>'; return; }
+    c.innerHTML = items.map(m => `
+      <div class="card pending">
+        <div class="card-name">${esc(m.name)}</div>
+        <div class="card-text">"${esc(m.text)}"</div>
+        <div class="card-meta">${formatDate(m.timestamp)}</div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-green" onclick="approveMsg('${m.id}')">✓ Approve</button>
+          <button class="btn btn-sm btn-red" onclick="rejectMsg('${m.id}')">✗ Reject</button>
+        </div>
+      </div>
+    `).join('');
+  } else if (currentTab === 'approved') {
+    const items = allMessages.filter(m => m.status === 'approved');
+    if (!items.length) { c.innerHTML = '<div class="empty">No approved messages yet</div>'; return; }
+    c.innerHTML = items.map(m => `
+      <div class="card approved">
+        <div class="card-name">${esc(m.name)}</div>
+        <div class="card-text">"${esc(m.text)}"</div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline" onclick="unapproveMsg('${m.id}')">Unpublish</button>
+          <button class="btn btn-sm btn-red" onclick="deleteMsg('${m.id}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  } else if (currentTab === 'rsvp') {
+    if (!allRSVPs.length) { c.innerHTML = '<div class="empty">No RSVPs yet</div>'; return; }
+    const yesCount = allRSVPs.filter(r => r.attending === 'yes').reduce((s, r) => s + (r.guests || 1), 0);
+    c.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+        <p style="color:var(--text-light);">Total guests attending: <strong style="color:var(--sage-dark);">${yesCount}</strong></p>
+        <button class="export-btn" onclick="exportRSVPs()">📥 Export CSV</button>
+      </div>
+      ${allRSVPs.map(r => `
+        <div class="rsvp-row">
+          <div>
+            <strong>${esc(r.name)}</strong>
+            <span style="color:var(--text-light); font-size:0.85rem;"> · ${r.guests} guest${r.guests > 1 ? 's' : ''}</span>
+            <div style="font-size:0.75rem; color:var(--text-light); margin-top:0.2rem;">${formatDate(r.timestamp)}</div>
+          </div>
+          <span class="badge-${r.attending}">${r.attending === 'yes' ? '✓ Attending' : '✗ Declined'}</span>
+        </div>
+      `).join('')}
+    `;
+  }
+}
+
+window.approveMsg = async function(id) {
+  try {
+    await updateDoc(doc(db, "messages", id), { status: 'approved' });
+    toast('Message approved 💚');
+  } catch (e) { toast('Failed: ' + e.message, true); }
+};
+
+window.rejectMsg = async function(id) {
+  if (!confirm('Reject and delete this message?')) return;
+  try {
+    await deleteDoc(doc(db, "messages", id));
+    toast('Message rejected');
+  } catch (e) { toast('Failed: ' + e.message, true); }
+};
+
+window.unapproveMsg = async function(id) {
+  try {
+    await updateDoc(doc(db, "messages", id), { status: 'pending' });
+    toast('Moved back to pending');
+  } catch (e) { toast('Failed: ' + e.message, true); }
+};
+
+window.deleteMsg = async function(id) {
+  if (!confirm('Permanently delete this message?')) return;
+  try {
+    await deleteDoc(doc(db, "messages", id));
+    toast('Message deleted');
+  } catch (e) { toast('Failed: ' + e.message, true); }
+};
+
+window.exportRSVPs = function() {
+  const rows = [['Name', 'Guests', 'Attending', 'Submitted']];
+  allRSVPs.forEach(r => rows.push([r.name, r.guests, r.attending, formatDate(r.timestamp)]));
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'rsvps.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleString();
+}
+
+function toast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (error ? ' error' : '');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
