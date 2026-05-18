@@ -1279,7 +1279,16 @@ function updateCountdown() {
 setInterval(updateCountdown, 1000);
 updateCountdown();
 
-function fmt(d) { return new Date(d).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; }
+function fmt(d) { 
+  const date = new Date(d);
+  const pad = n => String(n).padStart(2, '0');
+  return date.getFullYear() + 
+         pad(date.getMonth() + 1) + 
+         pad(date.getDate()) + 'T' +
+         pad(date.getHours()) + 
+         pad(date.getMinutes()) + 
+         pad(date.getSeconds());
+}
 function getReminderOffsetMinutes() {
   const eventTime = new Date(WEDDING_CONFIG.weddingDate).getTime();
   const reminderTime = new Date(WEDDING_CONFIG.reminderDate).getTime();
@@ -1308,8 +1317,7 @@ function addToGoogleCalendar() {
     WEDDING_CONFIG.venueAddress
   );
 
-  const url =
-    `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}&trp=true`;
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&ctz=Asia/Kolkata&details=${details}&location=${location}&trp=true`;
 
   window.open(url, '_blank');
 
